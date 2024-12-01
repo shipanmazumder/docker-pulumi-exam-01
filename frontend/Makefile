@@ -2,4 +2,4 @@
 # Target to rebuild without using the cache
 run:
 	@echo "Run Next with Development"
-	pnp run dev
+	npm run dev
