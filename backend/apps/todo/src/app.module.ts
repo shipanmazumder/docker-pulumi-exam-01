@@ -7,6 +7,7 @@ import config from './config';
 import { MongooseModule } from '@nestjs/mongoose';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import { HealthModule } from './health/health.module';
+import { CustomCorsMiddleware } from './middlewares/custom.middleware';
 @Module({
   imports: [
     ConfigModule.forRoot({
@@ -22,4 +23,7 @@ import { HealthModule } from './health/health.module';
   providers: [AppService],
 })
 export class AppModule {
+  configure(consumer: MiddlewareConsumer) {
+    consumer.apply(CustomCorsMiddleware).forRoutes('*');
+  }
 }
