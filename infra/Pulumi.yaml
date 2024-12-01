@@ -1,0 +1,10 @@
+name: todo-infra
+description: Todo
+runtime:
+  name: nodejs
+  options:
+    packagemanager: pnpm
+config:
+  pulumi:tags:
+    value:
+      pulumi:template: typescript
