@@ -1,35 +1,24 @@
 # Build Stage
-FROM node:20-alpine AS build_stage
-
-ENV NODE_OPTIONS="--max-old-space-size=4096"
-
-RUN apk add --no-cache openssh-client 
-RUN apk add --no-cache openssl
-
-RUN npm install -g pnpm
-
+FROM node:18-alpine AS build_stage
 WORKDIR /app
 COPY package*.json ./
+RUN npm install -g pnpm
+COPY . .
 RUN pnpm install
-
-# Copy environment file and source code
-COPY .env ./
-COPY . ./
-
 RUN pnpm run build
 
-# Production Stage
-FROM node:20-alpine AS production_stage
 
-# Install pnpm in the production stage
+# Production Stage
+FROM node:18-alpine AS production_stage
+
 RUN npm install -g pnpm
 
 ENV NODE_OPTIONS="--max-old-space-size=4096"
-
 WORKDIR /app
 COPY --from=build_stage /app/package*.json ./
 COPY --from=build_stage /app/.next ./.next
+COPY --from=build_stage /app/public ./public
 COPY --from=build_stage /app/node_modules ./node_modules
-
+ENV NODE_ENV=production
 EXPOSE 3000
-CMD ["pnpm", "start"]
+CMD ["npm", "start"]
