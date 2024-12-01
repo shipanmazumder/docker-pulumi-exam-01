@@ -30,7 +30,6 @@ WORKDIR /app
 COPY --from=build_stage /app/package*.json ./
 COPY --from=build_stage /app/.next ./.next
 COPY --from=build_stage /app/node_modules ./node_modules
-COPY --from=build_stage /app/.env ./.env
-ENV NODE_ENV=production
+
 EXPOSE 3000
 CMD ["pnpm", "start"]
