@@ -5,10 +5,10 @@ services:
     image: shipansm/todo-frontend:latest
     ports:
       - "3000:3000"
-    env_file:
-      - ./frontend/.env
     networks:
       - todo
+    env_file:
+      - ./.env
     environment:
       - NEXT_PUBLIC_API_BASE_URL=http://backend:4000
   backend:
@@ -17,8 +17,6 @@ services:
     image: shipansm/todo-backend:latest
     ports:
       - "4000:4000"
-    env_file:
-      - ./backend/.env
     networks:
       - todo
     healthcheck:
@@ -27,54 +25,27 @@ services:
       timeout: 5s
       retries: 2
       start_period: 60s
+  
+    env_file:
+      - ./.env
 
-  mongo:
-    restart: always
-    image: mongo
-    volumes:
-      - mongo_todo:/data/db
+  web:
+    build:
+      context: nginx
+      dockerfile: Dockerfile
+    container_name: web
     ports:
-      - "27017:27017"
-    environment:
-      MONGO_INITDB_ROOT_USERNAME: "${DATABASE_USER}"
-      MONGO_INITDB_ROOT_PASSWORD: "${DATABASE_PASSWORD}"
+      - 80:80
+    depends_on:
+      - backend
     networks:
       - todo
-
-  mongo-express:
-    image: mongo-express
-    restart: always
-    ports:
-      - "8081:8081"
-    environment:
-      ME_CONFIG_MONGODB_ADMINUSERNAME: "${DATABASE_USER}"
-      ME_CONFIG_MONGODB_ADMINPASSWORD: "${DATABASE_PASSWORD}"
-      ME_CONFIG_BASICAUTH_USERNAME: "${ME_CONFIG_BASICAUTH_USERNAME}"
-      ME_CONFIG_BASICAUTH_PASSWORD: "${ME_CONFIG_BASICAUTH_PASSWORD}"
-      ME_CONFIG_MONGODB_URL: "mongodb://${DATABASE_USER}:${DATABASE_PASSWORD}@mongo:27017/"
-      ME_CONFIG_BASICAUTH: "true"
-    networks:
-      - todo
-    deploy:
-      resources:
-        limits:
-          cpus: "0.25"
-          memory: 128M
 
   watchtower:
     image: containrrr/watchtower
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
-      - ~/.docker/config.json:/config.json
     command: --cleanup --interval 150
-    deploy:
-      resources:
-        limits:
-          cpus: "0.25"
-          memory: 128M
-
-volumes:
-  mongo_todo: {}
 
 networks:
   todo:

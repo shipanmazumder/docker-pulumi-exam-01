@@ -1,7 +1,7 @@
 # Makefile for Docker Compose
 
 # Default environment file path
-ENV_FILE=./backend/.env
+ENV_FILE=.env
 
 # Target to build and run containers
 up:

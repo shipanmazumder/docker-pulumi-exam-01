@@ -1,10 +1,13 @@
-name: todo-infra
-description: Todo
+name: todo-javascript-infra
+description: todo
 runtime:
   name: nodejs
   options:
-    packagemanager: pnpm
+    typescript: false
+    packagemanager: npm
 config:
   pulumi:tags:
     value:
-      pulumi:template: typescript
+      pulumi:template: aws-javascript
+  myproject:databaseUser: "shipan"
+  myproject:databasePassword: "shipan"
