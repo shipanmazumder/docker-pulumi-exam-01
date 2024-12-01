@@ -2,12 +2,9 @@ services:
   frontend:
     restart: always
     container_name: frontend
-    build:
-      context: frontend
-    depends_on:
-      - mongo
+    image: shipansm/todo-frontend:latest
     ports:
-      - 3000:3000
+      - "3000:3000"
     env_file:
       - ./frontend/.env
     networks:
@@ -15,29 +12,30 @@ services:
   backend:
     restart: always
     container_name: backend
-    build:
-      context: backend
-    depends_on:
-      - mongo
+    image: shipansm/todo-backend:latest
     ports:
-      - 4000:4000
+      - "4000:4000"
     env_file:
       - ./backend/.env
     networks:
       - todo
+    healthcheck:
+      test: curl --fail http://localhost:4000/health || exit 1
+      interval: 30s
+      timeout: 5s
+      retries: 2
+      start_period: 60s
 
   mongo:
     restart: always
     image: mongo
     volumes:
-      - mongo_db:/data/db
-    expose:
-      - 27017
+      - mongo_todo:/data/db
     ports:
       - "27017:27017"
     environment:
-      MONGO_INITDB_ROOT_USERNAME: ${DATABASE_USER}
-      MONGO_INITDB_ROOT_PASSWORD: ${DATABASE_PASSWORD}
+      MONGO_INITDB_ROOT_USERNAME: "${DATABASE_USER}"
+      MONGO_INITDB_ROOT_PASSWORD: "${DATABASE_PASSWORD}"
     networks:
       - todo
 
@@ -45,19 +43,37 @@ services:
     image: mongo-express
     restart: always
     ports:
-      - 8081:8081
+      - "8081:8081"
     environment:
-      ME_CONFIG_MONGODB_ADMINUSERNAME: ${DATABASE_USER}
-      ME_CONFIG_MONGODB_ADMINPASSWORD: ${DATABASE_PASSWORD}
-      ME_CONFIG_BASICAUTH_USERNAME: ${ME_CONFIG_BASICAUTH_USERNAME}
-      ME_CONFIG_BASICAUTH_PASSWORD: ${ME_CONFIG_BASICAUTH_PASSWORD}
-      ME_CONFIG_MONGODB_URL: mongodb://${DATABASE_USER}:${DATABASE_PASSWORD}@mongo:27017/
-      ME_CONFIG_BASICAUTH: true
-
+      ME_CONFIG_MONGODB_ADMINUSERNAME: "${DATABASE_USER}"
+      ME_CONFIG_MONGODB_ADMINPASSWORD: "${DATABASE_PASSWORD}"
+      ME_CONFIG_BASICAUTH_USERNAME: "${ME_CONFIG_BASICAUTH_USERNAME}"
+      ME_CONFIG_BASICAUTH_PASSWORD: "${ME_CONFIG_BASICAUTH_PASSWORD}"
+      ME_CONFIG_MONGODB_URL: "mongodb://${DATABASE_USER}:${DATABASE_PASSWORD}@mongo:27017/"
+      ME_CONFIG_BASICAUTH: "true"
     networks:
       - todo
+    deploy:
+      resources:
+        limits:
+          cpus: "0.25"
+          memory: 128M
+
+  watchtower:
+    image: containrrr/watchtower
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+      - ~/.docker/config.json:/config.json
+    command: --cleanup --interval 150
+    deploy:
+      resources:
+        limits:
+          cpus: "0.25"
+          memory: 128M
+
 volumes:
-  mongo_db: {}
+  mongo_todo: {}
+
 networks:
   todo:
     driver: bridge
