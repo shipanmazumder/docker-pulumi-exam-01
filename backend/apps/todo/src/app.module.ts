@@ -6,6 +6,7 @@ import { ConfigModule } from '@nestjs/config';
 import config from './config';
 import { MongooseModule } from '@nestjs/mongoose';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
+import { HealthModule } from './health/health.module';
 @Module({
   imports: [
     ConfigModule.forRoot({
@@ -15,6 +16,7 @@ import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
     }),
     MongooseModule.forRoot(config().database.url),
     TodoModule,
+    HealthModule,
   ],
   controllers: [AppController],
   providers: [AppService],
