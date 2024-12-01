@@ -1,7 +1,7 @@
 export default () => ({
-    port: parseInt(process.env.PORT, 10) || 3000,
+    port: parseInt(process.env.BACKEND_PORT, 10) || 4000,
     database: {
-        url: `mongodb://${process.env.DATABASE_USER}:${encodeURIComponent(process.env.DATABASE_PASSWORD)}@${process.env.DATABASE_HOST}/${process.env.DATABASE_NAME}?retryWrites=true&w=majority&authSource=admin`
+        url: `mongodb+srv://${process.env.DATABASE_USER}:${encodeURIComponent(process.env.DATABASE_PASSWORD)}@${process.env.DATABASE_HOST}/${process.env.DATABASE_NAME}?retryWrites=true&w=majority&authSource=admin`,
     },
     redisUrl: process.env.REDIS_URL || 'redis://localhost:6379',
     REDIS_HOST: process.env.REDIS_HOST || 'localhost',
