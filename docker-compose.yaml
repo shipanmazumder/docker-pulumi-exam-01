@@ -30,6 +30,8 @@ services:
     command: npm start
     depends_on:
       - backend
+    env_file:
+      - .env
 
   web:
     image: shipansm/todo-web:latest
