@@ -4,9 +4,13 @@ const nextConfig = {
     ignoreDuringBuilds: true,
   },
   images: { unoptimized: true },
-  // Add runtime config
+  serverRuntimeConfig: {
+    // Will only be available on the server side
+    apiBaseUrl: process.env.NEXT_PUBLIC_API_BASE_URL,
+  },
   publicRuntimeConfig: {
-    apiBaseUrl: process.env.NEXT_PUBLIC_API_BASE_URL
+    // Will be available on both server and client
+    apiBaseUrl: process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:3001',
   }
 };
 
