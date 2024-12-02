@@ -11,6 +11,7 @@ services:
       - ./.env
     environment:
       - NEXT_PUBLIC_API_BASE_URL=http://backend:4000
+    command: npm start
   backend:
     restart: always
     container_name: backend
@@ -44,6 +45,8 @@ services:
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
     command: --cleanup --interval 150
+    networks:
+      - todo
 
 networks:
   todo:
