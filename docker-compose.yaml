@@ -1,8 +1,23 @@
 services:
+  services:
+  frontend:
+    image: shipansm/todo-frontend:latest
+    container_name: frontend
+    ports:
+      - "3000:3000"
+    environment:
+      - NODE_ENV=production
+      - NEXT_PUBLIC_API_URL=http://backend:4000
+    depends_on:
+      - backend
+    networks:
+      - todo
+    env_file:
+      - .env
+      
   backend:
-    restart: always
-    container_name: backend
     image: shipansm/todo-backend:latest
+    container_name: backend
     ports:
       - "4000:4000"
     networks:
@@ -13,23 +28,7 @@ services:
       timeout: 5s
       retries: 2
       start_period: 60s
-  
-    env_file:
-      - .env
-  frontend:
-    restart: always
-    container_name: frontend
-    image: shipansm/todo-frontend:latest
-    ports:
-      - "3000:3000"
-    networks:
-      - todo
-    environment:
-      - NODE_ENV=production
-      - NEXT_PUBLIC_API_BASE_URL=http://backend:4000
-    command: npm start
-    depends_on:
-      - backend
+    
     env_file:
       - .env
 

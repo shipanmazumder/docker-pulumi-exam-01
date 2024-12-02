@@ -21,7 +21,7 @@ jobs:
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
 
-      - name: Backend Build and push
+      - name: Backend Build and Push
         uses: docker/build-push-action@v6
         with:
           platforms: linux/amd64
@@ -31,7 +31,8 @@ jobs:
           tags: ${{ secrets.DOCKER_USERNAME }}/todo-backend:latest
           cache-from: type=gha
           cache-to: type=gha,mode=max
-      - name: Frontend Build and push
+      
+      - name: Frontend Build and Push
         uses: docker/build-push-action@v6
         with:
           platforms: linux/amd64
@@ -41,7 +42,8 @@ jobs:
           tags: ${{ secrets.DOCKER_USERNAME }}/todo-frontend:latest
           cache-from: type=gha
           cache-to: type=gha,mode=max
-      - name: Web Build and push
+      
+      - name: Web Build and Push
         uses: docker/build-push-action@v6
         with:
           platforms: linux/amd64
