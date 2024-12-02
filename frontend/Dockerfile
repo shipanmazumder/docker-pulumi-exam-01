@@ -1,6 +1,9 @@
 # Use the official Next.js image or a Node.js base image
 FROM node:18-alpine
 
+# Install pnpm
+RUN npm install -g pnpm
+
 # Set working directory
 WORKDIR /app
 
@@ -8,7 +11,7 @@ WORKDIR /app
 COPY package*.json ./
 
 # Install dependencies
-RUN npm install
+RUN pnpm install
 
 # Copy the rest of the app
 COPY . .
@@ -18,10 +21,10 @@ ARG NEXT_PUBLIC_API_URL
 ENV NEXT_PUBLIC_API_URL=$NEXT_PUBLIC_API_URL
 
 # Build the application
-RUN npm run build
+RUN pnpm build
 
 # Expose the port
 EXPOSE 3000
 
 # Start the application
-CMD ["npm", "start"]
+CMD ["pnpm", "start"]
