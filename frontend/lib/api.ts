@@ -1,8 +1,8 @@
 import axios from "axios";
 import { Todo, TodoResponse, TodosListResponse } from "@/types/todo";
-
-const API_BASE_URL =
-	process.env.NEXT_PUBLIC_API_BASE_URL || "http://backend/api";
+import getConfig from 'next/config';
+const { publicRuntimeConfig } = getConfig();
+const API_BASE_URL = publicRuntimeConfig.apiBaseUrl;
 
 export const todoApi = {
 	async getAllTodos(): Promise<Todo[]> {

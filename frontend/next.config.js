@@ -1,10 +1,13 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-  // Remove static export since we need runtime environment variables
   eslint: {
     ignoreDuringBuilds: true,
   },
   images: { unoptimized: true },
+  // Add runtime config
+  publicRuntimeConfig: {
+    apiBaseUrl: process.env.NEXT_PUBLIC_API_BASE_URL
+  }
 };
 
 module.exports = nextConfig;

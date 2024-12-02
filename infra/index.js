@@ -67,9 +67,9 @@ const routeTableAssociation2 = new aws.ec2.RouteTableAssociation("public-rta-2",
     routeTableId: routeTable.id,
 });
 
-// Create a Security Group
+// Update Security Group configuration with additional ports
 const securityGroup = new aws.ec2.SecurityGroup("web-sg", {
-    description: "Allow inbound HTTP and SSH traffic",
+    description: "Allow inbound HTTP, HTTPS and custom application ports",
     vpcId: vpc.id,
     ingress: [
         {
@@ -80,9 +80,21 @@ const securityGroup = new aws.ec2.SecurityGroup("web-sg", {
         },
         {
             protocol: "tcp",
+            fromPort: 3000,
+            toPort: 3000,
+            cidrBlocks: ["0.0.0.0/0"],
+        },
+        {
+            protocol: "tcp",
+            fromPort: 4000,
+            toPort: 4000,
+            cidrBlocks: ["0.0.0.0/0"],
+        },
+        {
+            protocol: "tcp",
             fromPort: 22,
             toPort: 22,
-            cidrBlocks: ["0.0.0.0/0"], // For better security, replace with your IP
+            cidrBlocks: ["0.0.0.0/0"],
         }
     ],
     egress: [{
@@ -120,9 +132,9 @@ const createEC2Instance = (name, subnet) => {
 const instance1 = createEC2Instance("instance-1", publicSubnet1);
 const instance2 = createEC2Instance("instance-2", publicSubnet2);
 
-// Create a Target Group
+// Update Target Group health check configuration
 const targetGroup = new aws.lb.TargetGroup("web-tg", {
-    port: 80,
+    port: 4000, // Changed to match backend port
     protocol: "HTTP",
     vpcId: vpc.id,
     targetType: "instance",
@@ -134,6 +146,7 @@ const targetGroup = new aws.lb.TargetGroup("web-tg", {
         timeout: 5,
         healthyThreshold: 3,
         unhealthyThreshold: 3,
+        port: "4000"
     },
     tags: {
         Name: "web-target-group",
@@ -144,13 +157,13 @@ const targetGroup = new aws.lb.TargetGroup("web-tg", {
 const targetGroupAttachment1 = new aws.lb.TargetGroupAttachment("tg-attachment-1", {
     targetGroupArn: targetGroup.arn,
     targetId: instance1.id,
-    port: 80,
+    port: 4000,
 });
 
 const targetGroupAttachment2 = new aws.lb.TargetGroupAttachment("tg-attachment-2", {
     targetGroupArn: targetGroup.arn,
     targetId: instance2.id,
-    port: 80,
+    port: 4000,
 });
 
 // Create an Application Load Balancer
