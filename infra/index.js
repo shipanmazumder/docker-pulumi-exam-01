@@ -129,8 +129,8 @@ const createEC2Instance = (name, subnet) => {
     });
 };
 
-const instance1 = createEC2Instance("instance-1", publicSubnet1);
-const instance2 = createEC2Instance("instance-2", publicSubnet2);
+const instance1 = createEC2Instance("todo-1", publicSubnet1);
+const instance2 = createEC2Instance("todo-2", publicSubnet2);
 
 // Update Target Group health check configuration
 const targetGroup = new aws.lb.TargetGroup("web-tg", {
@@ -146,7 +146,7 @@ const targetGroup = new aws.lb.TargetGroup("web-tg", {
         timeout: 5,
         healthyThreshold: 3,
         unhealthyThreshold: 3,
-        port: "4000"
+        port: "80"
     },
     tags: {
         Name: "web-target-group",
@@ -157,13 +157,13 @@ const targetGroup = new aws.lb.TargetGroup("web-tg", {
 const targetGroupAttachment1 = new aws.lb.TargetGroupAttachment("tg-attachment-1", {
     targetGroupArn: targetGroup.arn,
     targetId: instance1.id,
-    port: 4000,
+    port: 80,
 });
 
 const targetGroupAttachment2 = new aws.lb.TargetGroupAttachment("tg-attachment-2", {
     targetGroupArn: targetGroup.arn,
     targetId: instance2.id,
-    port: 4000,
+    port: 80,
 });
 
 // Create an Application Load Balancer

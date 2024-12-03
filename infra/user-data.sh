@@ -23,21 +23,32 @@ apt-get install -y docker-ce docker-ce-cli containerd.io docker-buildx-plugin do
 systemctl start docker
 systemctl enable docker
 
-# Add ubuntu user to docker group
+# Ensure ubuntu user exists and has proper permissions
+if ! id "ubuntu" &>/dev/null; then
+    useradd -m -s /bin/bash ubuntu
+fi
+
+# Add ubuntu user to docker group (create group if it doesn't exist)
+groupadd -f docker
 usermod -aG docker ubuntu
 
 # Install Docker Compose
 curl -L "https://github.com/docker/compose/releases/download/v2.24.5/docker-compose-$(uname -s)-$(uname -m)" -o /usr/local/bin/docker-compose
 chmod +x /usr/local/bin/docker-compose
 
-# Create app directory
+# Create app directory with proper ownership and permissions
 mkdir -p /app
-cd /app
+chown ubuntu:ubuntu /app
+chmod 755 /app
 
-# Create .env file
-cat << 'EOF' > .env
+# Make sure we can write to the directory
+cd /app || exit 1
+
+# Ensure files are created with correct ownership
+sudo -u ubuntu bash << 'EOSCRIPT'
+cat << 'EOF' > /app/.env
 DATABASE_URL='mongodb://shipan:shipan@mongo:27017/curi'
-DATABASE_HOST="mongo"
+DATABASE_HOST="cluster0.hrm0l.mongodb.net"
 DATABASE_NAME="todo"
 DATABASE_USER="shipan"
 DATABASE_PASSWORD="shipan"
@@ -45,29 +56,30 @@ ME_CONFIG_BASICAUTH_USERNAME="shipan"
 ME_CONFIG_BASICAUTH_PASSWORD="shipan"
 BACKEND_PORT=4000
 PORT=3000
-NEXT_PUBLIC_API_BASE_URL=http://backend/api 
+NEXT_PUBLIC_API_BASE_URL=http://exam.shipan.xyz/api 
 EOF
 
-# Create docker-compose.yaml
-cat << 'EOF' > docker-compose.yaml
+cat << 'EOF' > /app/docker-compose.yaml
 services:
   frontend:
-    restart: always
-    container_name: frontend
     image: shipansm/todo-frontend:latest
+    container_name: frontend
+    command: npm start
     ports:
       - "3000:3000"
+    environment:
+      - NODE_ENV=production
+      - NEXT_PUBLIC_API_URL=http://backend:4000
+    depends_on:
+      - backend
     networks:
       - todo
     env_file:
-      - ./.env
-    environment:
-      - NEXT_PUBLIC_API_BASE_URL=http://backend:4000
-    command: npm start
+      - .env
+      
   backend:
-    restart: always
-    container_name: backend
     image: shipansm/todo-backend:latest
+    container_name: backend
     ports:
       - "4000:4000"
     networks:
@@ -78,8 +90,9 @@ services:
       timeout: 5s
       retries: 2
       start_period: 60s
+    
     env_file:
-      - ./.env
+      - .env
 
   web:
     image: shipansm/todo-web:latest
@@ -102,7 +115,9 @@ services:
 networks:
   todo:
     driver: bridge
+
 EOF
+EOSCRIPT
 
 # Start containers
 docker compose up -d
