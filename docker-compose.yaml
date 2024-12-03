@@ -1,8 +1,8 @@
 services:
-  services:
   frontend:
     image: shipansm/todo-frontend:latest
     container_name: frontend
+    command: npm start
     ports:
       - "3000:3000"
     environment:

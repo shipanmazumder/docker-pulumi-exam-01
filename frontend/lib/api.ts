@@ -1,7 +1,7 @@
 import axios from "axios";
 import { Todo, TodoResponse, TodosListResponse } from "@/types/todo";
 
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:3001';
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL || 'http://exam.shipan.xyz/api';
 
 export const todoApi = {
 	async getAllTodos(): Promise<Todo[]> {
