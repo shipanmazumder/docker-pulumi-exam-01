@@ -3,8 +3,20 @@ const pulumi = require("@pulumi/pulumi");
 const aws = require("@pulumi/aws");
 const fs = require("fs");
 
-const regionName="ap-southeast-1";
-const AMI="ami-047126e50991d067b";
+const regionName="us-east-1";
+const AMI="ami-0e2c8caa4b6378d8c";
+
+const awsProvider = new aws.Provider("aws", {
+    region: regionName,
+    // Add any other provider configurations
+});
+
+const getAvailabilityZones = async () => {
+    const azs = await aws.getAvailabilityZones({
+        state: "available",
+    });
+    return azs.names;
+};
 
 //Step 1) Create a VPC
 const vpc = new aws.ec2.Vpc("pulumi-vpc", {
@@ -20,7 +32,7 @@ const vpc = new aws.ec2.Vpc("pulumi-vpc", {
 const publicSubnet1 = new aws.ec2.Subnet("pulumi-pub-subnet-1", {
     vpcId: vpc.id,
     cidrBlock: "10.0.1.0/24",
-    availabilityZone: `${regionName}a`,
+    availabilityZone: regionName + "a",
     mapPublicIpOnLaunch: true,
     tags: {
         Name: "pulumi-pub-subnet-1",
@@ -30,7 +42,7 @@ const publicSubnet1 = new aws.ec2.Subnet("pulumi-pub-subnet-1", {
 const publicSubnet2 = new aws.ec2.Subnet("pulumi-pub-subnet-2", {
     vpcId: vpc.id,
     cidrBlock: "10.0.2.0/24",
-    availabilityZone: `${regionName}b`,
+    availabilityZone:  regionName + "b",
     mapPublicIpOnLaunch: true,
     tags: {
         Name: "pulumi-pub-subnet-2",
@@ -145,7 +157,7 @@ const instance2 = createEC2Instance("todo-2", publicSubnet2);
 
 //Step 9)  Update Target Group health check configuration
 const targetGroup = new aws.lb.TargetGroup("pulumi-tg", {
-    port: 3000, 
+    port: 80, 
     protocol: "HTTP",
     vpcId: vpc.id,
     targetType: "instance",
@@ -157,7 +169,7 @@ const targetGroup = new aws.lb.TargetGroup("pulumi-tg", {
         timeout: 5,
         healthyThreshold: 3,
         unhealthyThreshold: 3,
-        port: "3000"
+        port: "80"
     },
     tags: {
         Name: "pulumi-target-group",
@@ -168,13 +180,13 @@ const targetGroup = new aws.lb.TargetGroup("pulumi-tg", {
 const targetGroupAttachment1 = new aws.lb.TargetGroupAttachment("pulumi-attachment-instance-1", {
     targetGroupArn: targetGroup.arn,
     targetId: instance1.id,
-    port: 3000,
+    port: 80,
 });
 
 const targetGroupAttachment2 = new aws.lb.TargetGroupAttachment("pulumi-attachment-instance-2", {
     targetGroupArn: targetGroup.arn,
     targetId: instance2.id,
-    port: 3000,
+    port: 80,
 });
 
 // Create an Application Load Balancer
