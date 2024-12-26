@@ -40,43 +40,62 @@ A modern, containerized Todo application built with Next.js, NestJS, and managed
 - Pulumi CLI
 - Make
 
+# Infrastructure Diagram
+
+This diagram represents the cloud infrastructure for the Todo application, set up using Pulumi, AWS, and Docker. The infrastructure includes VPC, Subnets, EC2 instances, Load Balancer, and other necessary resources.
+
+## Architecture Overview
+
+- **VPC**: A Virtual Private Cloud (VPC) is created to isolate the network infrastructure.
+- **Subnets**: Two public subnets in different Availability Zones (AZs) for high availability.
+- **Security Group**: A security group that allows inbound HTTP, HTTPS, and custom application ports (3000, 4000, 22).
+- **Key Pair**: A key pair for SSH access to EC2 instances.
+- **EC2 Instances**: Two EC2 instances in different subnets hosting the backend API and frontend.
+- **Application Load Balancer (ALB)**: Distributes traffic between the EC2 instances for scalability and high availability.
+- **Target Group**: An ALB target group that ensures health checks are performed on the EC2 instances.
+- **User Data**: Scripts to configure the EC2 instances (e.g., install software, start services).
+
 ## Diagram
-##### Below is a basic architecture diagram of the infrastructure:
-+---------------------------+
-|         Internet           |
-|         Gateway            |
-+------------+--------------+
-             |
-             |
-         +---+---+
-         | VPC   |
-         +---+---+
-             |
-   +---------+---------+
-   |                   |
-+--+--+             +--+--+
-| Subnet 1           | Subnet 2 |
-| (AZ A)             | (AZ B)   |
-+--+--+             +--+--+
-   |                   |
-+--+---+             +--+---+
-| EC2 1 |             | EC2 2  |
-+-------+             +-------+
-   |
-   +-------------------+
-   | Target Group      |
-   +-------------------+
-         |
-         v
-   +--------------------+
-   | Application Load   |
-   | Balancer (ALB)     |
-   +--------------------+
-         |
-         v
-   +-------------------+
-   | Public Internet   |
-   +-------------------+
+
+```plaintext
+                                +-------------------+
+                                |      Pulumi       |
+                                |    Infrastructure |
+                                |     Code (IaC)    |
+                                +-------------------+
+                                        |
+                                        |
+                         +-----------------------------+
+                         |       AWS Infrastructure    |
+                         +-----------------------------+
+                                        |
+                +------------------------------------------+
+                |                     VPC                  |
+                |               (10.0.0.0/16)               |
+                +------------------------------------------+
+                      |                              |
+          +-------------------+            +-------------------+
+          |  Public Subnet 1   |            |  Public Subnet 2   |
+          |   (10.0.1.0/24)    |            |   (10.0.2.0/24)    |
+          +-------------------+            +-------------------+
+                      |                              |
+           +------------------+          +------------------+
+           | EC2 Instance 1    |          | EC2 Instance 2    |
+           |   (t2.micro)       |          |   (t2.micro)       |
+           +------------------+          +------------------+
+                      |                              |
+          +-------------------------------+   +-------------------------------+
+          |      Application Load Balancer |   |        Target Group (ALB)       |
+          +-------------------------------+   +-------------------------------+
+                         |                          |
+                         +--------------------------+
+                                  |
+                         +----------------------+
+                         |   Health Checks      |
+                         |   (HTTP 200)         |
+                         +----------------------+
+
+```
 
 ## Getting Started
 
