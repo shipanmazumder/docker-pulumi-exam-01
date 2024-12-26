@@ -47,7 +47,7 @@ cd /app || exit 1
 # Ensure files are created with correct ownership
 sudo -u ubuntu bash << 'EOSCRIPT'
 cat << 'EOF' > /app/.env
-DATABASE_URL='mongodb://shipan:shipan@mongo:27017/curi'
+DATABASE_URL='mongodb+srv://shipan_pulumi:6KfM6jH1GhwN1xSl@cluster0.hrm0l.mongodb.net/todo?retryWrites=true&w=majority'
 DATABASE_HOST="cluster0.hrm0l.mongodb.net"
 DATABASE_NAME="todo"
 DATABASE_USER="shipan"

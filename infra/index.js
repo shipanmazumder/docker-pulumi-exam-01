@@ -3,47 +3,52 @@ const pulumi = require("@pulumi/pulumi");
 const aws = require("@pulumi/aws");
 const fs = require("fs");
 
-// Create a VPC
-const vpc = new aws.ec2.Vpc("my-vpc", {
+const regionName="ap-southeast-1";
+const AMI="ami-047126e50991d067b";
+
+//Step 1) Create a VPC
+const vpc = new aws.ec2.Vpc("pulumi-vpc", {
     cidrBlock: "10.0.0.0/16",
     enableDnsHostnames: true,
     enableDnsSupport: true,
     tags: {
-        Name: "my-vpc",
+        Name: "pulumi-vpc",
     },
 });
 
-// Create an Internet Gateway
-const internetGateway = new aws.ec2.InternetGateway("my-igw", {
-    vpcId: vpc.id,
-    tags: {
-        Name: "my-igw",
-    },
-});
-
-// Create Public Subnets in two Availability Zones
-const publicSubnet1 = new aws.ec2.Subnet("public-subnet-1", {
+//Step 2) Create Public Subnets in two Availability Zones
+const publicSubnet1 = new aws.ec2.Subnet("pulumi-pub-subnet-1", {
     vpcId: vpc.id,
     cidrBlock: "10.0.1.0/24",
-    availabilityZone: "ap-southeast-1a",
+    availabilityZone: `${regionName}a`,
     mapPublicIpOnLaunch: true,
     tags: {
-        Name: "public-subnet-1",
+        Name: "pulumi-pub-subnet-1",
     },
 });
 
-const publicSubnet2 = new aws.ec2.Subnet("public-subnet-2", {
+const publicSubnet2 = new aws.ec2.Subnet("pulumi-pub-subnet-2", {
     vpcId: vpc.id,
     cidrBlock: "10.0.2.0/24",
-    availabilityZone: "ap-southeast-1b",
+    availabilityZone: `${regionName}b`,
     mapPublicIpOnLaunch: true,
     tags: {
-        Name: "public-subnet-2",
+        Name: "pulumi-pub-subnet-2",
     },
 });
 
-// Create a Route Table
-const routeTable = new aws.ec2.RouteTable("public-rt", {
+
+//Step 3) Create an Internet Gateway
+const internetGateway = new aws.ec2.InternetGateway("pulumi-igw", {
+    vpcId: vpc.id,
+    tags: {
+        Name: "pulumi-igw",
+    },
+});
+
+
+//Step 4) Create a Route Table
+const routeTable = new aws.ec2.RouteTable("pulumi_pub", {
     vpcId: vpc.id,
     routes: [
         {
@@ -52,22 +57,28 @@ const routeTable = new aws.ec2.RouteTable("public-rt", {
         },
     ],
     tags: {
-        Name: "public-rt",
+        Name: "pulumi_pub",
     },
 });
 
-// Associate the Route Table with Public Subnets
-const routeTableAssociation1 = new aws.ec2.RouteTableAssociation("public-rta-1", {
+
+//Step 5) Associate the Route Table with Public Subnets
+const routeTableAssociation1 = new aws.ec2.RouteTableAssociation("pulumi_pub_a-1", {
     subnetId: publicSubnet1.id,
     routeTableId: routeTable.id,
 });
 
-const routeTableAssociation2 = new aws.ec2.RouteTableAssociation("public-rta-2", {
+const routeTableAssociation2 = new aws.ec2.RouteTableAssociation("pulumi_pub_a-2", {
     subnetId: publicSubnet2.id,
     routeTableId: routeTable.id,
 });
 
-// Update Security Group configuration with additional ports
+
+
+
+
+
+//Step 6) Update Security Group configuration with additional ports
 const securityGroup = new aws.ec2.SecurityGroup("web-sg", {
     description: "Allow inbound HTTP, HTTPS and custom application ports",
     vpcId: vpc.id,
@@ -108,16 +119,16 @@ const securityGroup = new aws.ec2.SecurityGroup("web-sg", {
     },
 });
 
-// Create a key pair
-const keyPair = new aws.ec2.KeyPair("my-key-pair", {
+//Step 7) Create a key pair
+const keyPair = new aws.ec2.KeyPair("pulumi-pair", {
     publicKey: "ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAACAQDUMyMEy2VKqS46kRC7cpRfJABAcm3y34N1p44b1byjstfP133uFmDUtafaJ5FCV8Ag65BIRD2EkrdHrdmg9Ky6k/GwTLXIPaoV82nWYi69toQylHwoOHkeOb40bHIgpLY8rIlwXpDAehG4EylsnqQPOh1WDHgr2arkdJcvDMmr3CGtWJiM06fe8U1retyNfrC1t7Co2Yrobra5Mdw0TkMDGLxCDAqzOnjohVzRlcTnPchIjaDtoemj2vmqZkx+6zjpFNhqK5/5qIgAVunihbLWqPm4Wkl7wrotv/wTu8eSQ7mKPmdjzeZa1FD2rPtlgQcUs1zgNo2M8mfUz8Y+O+OrwLp6Ny1wvRHsQl2mHa6NA7kOw4ALkf+rvIh11ERdmBuol3DRnQ6atyJ/c32AkU4rAcjNul0cRX2QScQn6eUeXmqo/b+W1hmcxTIQ8uj1BeTiEfnD4nP4WQO7inySjoGb/LXXAkxZlInHF7SWs27hOhqiMFahI5duQOLBM01d1bUbcKF8tUizYZb46d8kWD9dlq63UeBzeITXzfKtweowQz9QGpWJuetFWmyY2gHZe+kroNY0EnTOxC9oovnARnJD1nOo/Vaskgo8Oxyc/lAVpY9CLj5bARYTw561/CbTJnTVRUsSGOC3HI1hiiJUVnAexaHVGtWMEUxNMqhh7K4p1w== shipanmazumder@gmail.com", // Replace with your public key
 });
 
-// Create EC2 Instances
+//Step 8) Create EC2 Instances
 const createEC2Instance = (name, subnet) => {
     return new aws.ec2.Instance(name, {
         instanceType: "t2.micro",
-        ami: "ami-047126e50991d067b",  // Change with your AMI ID
+        ami: AMI,  // Change with your AMI ID
         subnetId: subnet.id,
         associatePublicIpAddress: true,
         vpcSecurityGroupIds: [securityGroup.id],
@@ -132,9 +143,9 @@ const createEC2Instance = (name, subnet) => {
 const instance1 = createEC2Instance("todo-1", publicSubnet1);
 const instance2 = createEC2Instance("todo-2", publicSubnet2);
 
-// Update Target Group health check configuration
-const targetGroup = new aws.lb.TargetGroup("web-tg", {
-    port: 4000, // Changed to match backend port
+//Step 9)  Update Target Group health check configuration
+const targetGroup = new aws.lb.TargetGroup("pulumi-tg", {
+    port: 3000, 
     protocol: "HTTP",
     vpcId: vpc.id,
     targetType: "instance",
@@ -146,34 +157,34 @@ const targetGroup = new aws.lb.TargetGroup("web-tg", {
         timeout: 5,
         healthyThreshold: 3,
         unhealthyThreshold: 3,
-        port: "80"
+        port: "3000"
     },
     tags: {
-        Name: "web-target-group",
+        Name: "pulumi-target-group",
     },
 });
 
 // Attach EC2 Instances to Target Group
-const targetGroupAttachment1 = new aws.lb.TargetGroupAttachment("tg-attachment-1", {
+const targetGroupAttachment1 = new aws.lb.TargetGroupAttachment("pulumi-attachment-instance-1", {
     targetGroupArn: targetGroup.arn,
     targetId: instance1.id,
-    port: 80,
+    port: 3000,
 });
 
-const targetGroupAttachment2 = new aws.lb.TargetGroupAttachment("tg-attachment-2", {
+const targetGroupAttachment2 = new aws.lb.TargetGroupAttachment("pulumi-attachment-instance-2", {
     targetGroupArn: targetGroup.arn,
     targetId: instance2.id,
-    port: 80,
+    port: 3000,
 });
 
 // Create an Application Load Balancer
-const alb = new aws.lb.LoadBalancer("web-alb", {
+const alb = new aws.lb.LoadBalancer("pulumi-web-alb", {
     internal: false,
     loadBalancerType: "application",
     securityGroups: [securityGroup.id],
     subnets: [publicSubnet1.id, publicSubnet2.id],
     tags: {
-        Name: "web-alb",
+        Name: "pulumi-web-alb",
     },
 });
 
