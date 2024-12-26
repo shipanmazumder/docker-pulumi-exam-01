@@ -41,7 +41,7 @@ async function bootstrap() {
     .addTag('todos')
     .build();
   const document = SwaggerModule.createDocument(app, config);
-  SwaggerModule.setup('docs', app, document);
+  SwaggerModule.setup('api/docs', app, document);
   app.useGlobalFilters(new NotFoundExceptionFilter());
   app.useGlobalFilters(new ServerExceptionFilter());
   app.use(bodyParser.json({ limit: '50mb' }));

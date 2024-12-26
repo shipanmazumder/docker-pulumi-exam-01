@@ -5,9 +5,9 @@ import { TodoModule } from './todo/todo.module';
 import { ConfigModule } from '@nestjs/config';
 import config from './config';
 import { MongooseModule } from '@nestjs/mongoose';
-import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import { HealthModule } from './health/health.module';
 import { CustomCorsMiddleware } from './middlewares/custom.middleware';
+import { RoutesModule } from './routes/routes.module';
 @Module({
   imports: [
     ConfigModule.forRoot({
@@ -18,6 +18,7 @@ import { CustomCorsMiddleware } from './middlewares/custom.middleware';
     MongooseModule.forRoot(config().database.url),
     TodoModule,
     HealthModule,
+    RoutesModule,
   ],
   controllers: [AppController],
   providers: [AppService],

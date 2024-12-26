@@ -210,7 +210,6 @@ const listener = new aws.lb.Listener("web-listener", {
         targetGroupArn: targetGroup.arn,
     }],
 });
-
 // Export the VPC ID, EC2 instance public IPs, and ALB DNS name
 exports.vpcId = vpc.id;
 exports.instance1PublicIp = instance1.publicIp;

@@ -10,7 +10,7 @@ import { TodoResponse } from './resources/todo.resource';
 import { ApiCustomResponse } from '../decorators/api-custom-response.decorator';
 import { SuccessResponseDto } from '../utils/success.util';
 
-@Controller('api/todos')
+@Controller('todos')
 export class TodoController {
   constructor(private readonly todoService: TodoService) { }
 
