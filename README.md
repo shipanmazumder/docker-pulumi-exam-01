@@ -40,6 +40,44 @@ A modern, containerized Todo application built with Next.js, NestJS, and managed
 - Pulumi CLI
 - Make
 
+## Diagram
+##### Below is a basic architecture diagram of the infrastructure:
++---------------------------+
+|         Internet           |
+|         Gateway            |
++------------+--------------+
+             |
+             |
+         +---+---+
+         | VPC   |
+         +---+---+
+             |
+   +---------+---------+
+   |                   |
++--+--+             +--+--+
+| Subnet 1           | Subnet 2 |
+| (AZ A)             | (AZ B)   |
++--+--+             +--+--+
+   |                   |
++--+---+             +--+---+
+| EC2 1 |             | EC2 2  |
++-------+             +-------+
+   |
+   +-------------------+
+   | Target Group      |
+   +-------------------+
+         |
+         v
+   +--------------------+
+   | Application Load   |
+   | Balancer (ALB)     |
+   +--------------------+
+         |
+         v
+   +-------------------+
+   | Public Internet   |
+   +-------------------+
+
 ## Getting Started
 
 1. Clone the repository:
@@ -95,7 +133,20 @@ This will start both frontend and backend services in development mode.
 make dev          # Start development environment
 make build        # Build all containers
 make down         # Stop all containers
+make test         # Run all tests
+make test-frontend # Run frontend tests
+make test-backend  # Run backend tests
 ```
+
+## Testing
+
+### Frontend Testing
+- Uses Jest and React Testing Library
+- Run tests with `make test-frontend`
+
+### Backend Testing
+- Uses Jest for unit and integration tests
+- Run tests with `make test-backend`
 
 ## API Documentation
 
