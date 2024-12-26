@@ -173,6 +173,7 @@ make test-backend  # Run backend tests
 ## API Documentation
 
 The backend API provides the following endpoints:
+- `GET /api/docs` - For All API doc
 
 - `GET /api/todos` - List all todos
 - `POST /api/todos` - Create a new todo
